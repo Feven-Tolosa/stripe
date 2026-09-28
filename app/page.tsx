@@ -1,4 +1,8 @@
-export default async function IndexPage({ searchParams }) {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function IndexPage({ searchParams }: Props) {
   const { canceled } = await searchParams
 
   if (canceled) {
