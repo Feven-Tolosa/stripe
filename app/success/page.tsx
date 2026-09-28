@@ -1,19 +1,25 @@
 import { redirect } from 'next/navigation'
 
+import { stripe } from '@/lib/stripe'
 
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
 
-export default async function Success({ searchParams }) {
+export default async function Success({ searchParams }: Props) {
   const { session_id } = await searchParams
 
-  if (!session_id)
+  if (!session_id || typeof session_id !== 'string')
     throw new Error('Please provide a valid session_id (`cs_test_...`)')
 
-  const {
-    status,
-    customer_details: { email: customerEmail }
-  } = await Stripe.checkout.sessions.retrieve(session_id, {
-    expand: ['line_items', 'payment_intent']
-  })
+  const { status, customer_details } = await stripe.checkout.sessions.retrieve(
+    session_id,
+    {
+      expand: ['line_items', 'payment_intent'],
+    }
+  )
+
+  const customerEmail = customer_details?.email ?? 'your email address'
 
   if (status === 'open') {
     return redirect('/')
